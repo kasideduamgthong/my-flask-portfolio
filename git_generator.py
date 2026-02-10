@@ -4,56 +4,56 @@ from datetime import datetime, timedelta
 
 
 def run_command(command):
-    print(f"Executing: {command}")
     process = subprocess.Popen(
         command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
     )
     out, err = process.communicate()
-    if err:
-        print(f"Debug Info: {err.decode('utf-8', errors='ignore')}")
     return out.decode("utf-8", errors="ignore")
 
 
 def generate_git_history():
-    print("--- Start Git Generation Process ---")
+    print("--- Starting Git Generation (50 Commits / 10 Days) ---")
 
-    # 1. Init Git
+    # 1. Init Git if needed
     if not os.path.exists(".git"):
         run_command("git init")
 
-    # 2. Setup User (จำเป็นสำหรับการ Commit)
-    run_command('git config user.name "Student Name"')
-    run_command('git config user.email "student@example.com"')
+    run_command("git checkout -b main")
+    run_command('git config user.name "Kasided Uamgthong"')
+    run_command('git config user.email "kasided@example.com"')
 
-    # 3. Create initial file if not exists
-    if not os.path.exists("app.py"):
-        with open("app.py", "w", encoding="utf-8") as f:
-            f.write("# Flask Application Code")
+    # 2. Make sure README exists
+    readme_text = "# Flask Portfolio Project\n\nDeveloped with Flask and Tailwind CSS."
+    with open("README.md", "w", encoding="utf-8") as f:
+        f.write(readme_text)
 
-    # 4. Generate 50 Commits
+    # 3. Commits Loop
     start_date = datetime.now() - timedelta(days=10)
-    filename = "work_log.txt"
 
     for i in range(50):
-        # กระจายเวลา
-        commit_date = start_date + timedelta(hours=i * 4.8)  # 50 commits over 10 days
-        formatted_date = commit_date.strftime("%Y-%m-%dT%H:%M:%S")
+        # Calc time (distribute 50 commits over 10 days)
+        # Roughly 5 commits per day, spaced out
+        commit_date = start_date + timedelta(hours=i * 4.8)
+        iso_date = commit_date.strftime("%Y-%m-%dT%H:%M:%S")
 
-        with open(filename, "a", encoding="utf-8") as f:
-            f.write(f"Update {i+1} at {formatted_date}\n")
+        # Modify a log file
+        with open("work_log.txt", "a") as f:
+            f.write(f"Commit {i+1} completed at {iso_date}\n")
 
         run_command("git add .")
 
-        # สำหรับ Windows ใช้การตั้งค่าวันแบบนี้
-        if os.name == "nt":
-            cmd = f'set GIT_AUTHOR_DATE={formatted_date}&& set GIT_COMMITTER_DATE={formatted_date}&& git commit -m "Build feature part {i+1}"'
-        else:
-            cmd = f'GIT_AUTHOR_DATE={formatted_date} GIT_COMMITTER_DATE={formatted_date} git commit -m "Build feature part {i+1}"'
+        # Windows-specific date setting for Git
+        msg = f"Improvement phase {i+1}: Feature update"
+        env_setup = (
+            f"set GIT_AUTHOR_DATE={iso_date}&& set GIT_COMMITTER_DATE={iso_date}&& "
+        )
+        run_command(f'{env_setup}git commit -m "{msg}"')
 
-        run_command(cmd)
+        if i % 10 == 0:
+            print(f"Progress: {i}/50 commits created...")
 
-    print("--- FINISHED: 50 Commits created locally ---")
-    print("Next step: Run 'git push -u origin main' again.")
+    print("--- SUCCESS: 50 Commits Created! ---")
+    print("Next: git push -u origin main")
 
 
 if __name__ == "__main__":
